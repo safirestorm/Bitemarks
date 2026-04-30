@@ -1,3 +1,4 @@
+import { app } from './firebase';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
@@ -8,7 +9,12 @@ import { CreatePage } from './components/CreatePage';
 
 const Stack = createNativeStackNavigator();
 
+
 export default function App() {
+  alert(JSON.stringify(app, null, 4))
+
+
+
   return (
     <NavigationContainer>
       <Stack.Navigator>
