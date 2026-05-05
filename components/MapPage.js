@@ -1,6 +1,6 @@
 import { View, Text } from "react-native";
 
-export function MainPage() {
+export function MapPage() {
     return(
         <View>
         <Text>Placeholder</Text>
