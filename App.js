@@ -1,36 +1,14 @@
 import { app } from './firebase';
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { RootStack } from './components/Navigation';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { MainPage } from './components/MainPage';
-import { DetailsPage } from './components/DetailPage';
-import { CreatePage } from './components/CreatePage';
-
-const Stack = createNativeStackNavigator();
-
 
 export default function App() {
-  alert(JSON.stringify(app, null, 4))
-
-
 
   return (
-    <NavigationContainer>
-      <Stack.Navigator>
-        <Stack.Screen name='Main' component={MainPage} />
-        <Stack.Screen name='Detail' component={DetailsPage} />
-        <Stack.Screen name='Create' component={CreatePage} />
-      </Stack.Navigator>
-    </NavigationContainer>
+      <NavigationContainer>
+        <RootStack />
+      </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+
