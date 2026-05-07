@@ -2,6 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import LoginPage from './LoginPage';
 import { HomePage } from './HomePage';
 import { DetailsPage } from './DetailPage';
 import { CreatePage } from './CreatePage';
@@ -13,29 +14,32 @@ const Tab = createBottomTabNavigator();
 
 export function RootStack() {
     return (
-        <Stack.Navigator
-            initialRouteName="Tabs"
-        >
-        <Stack.Screen
-        name='Tabs'
-        component={BottomTab}
-        options={{ headerShown: false}} // fjerner stack-headeren
-        />
-        <Stack.Screen 
-        name='Detail' 
-        component={DetailsPage}
-        options={{
-            title: 'Detaljer'
-        }} />
-        <Stack.Screen 
-        name='Create' 
-        component={CreatePage} 
-        options={{
-            title: 'Opret Spisested'
-        }}/>
+        <Stack.Navigator initialRouteName='Login'>
+
+            <Stack.Screen
+                name='Login'
+                component={LoginPage}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen
+                name='Tabs'
+                component={BottomTab}
+                options={{ headerShown: false }}
+            />
+            <Stack.Screen 
+                name='Detail' 
+                component={DetailsPage}
+                options={{ title: 'Detaljer' }} 
+            />
+            <Stack.Screen 
+                name='Create' 
+                component={CreatePage} 
+                options={{ title: 'Opret Spisested' }}
+            />
         </Stack.Navigator>
     );
 }
+
 
 export function BottomTab() {
     return (
