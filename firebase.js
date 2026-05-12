@@ -4,6 +4,7 @@ import { getFirestore } from 'firebase/firestore';
 import { initializeAuth, getAuth, getReactNativePersistence } from 'firebase/auth';
 import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import { Platform } from 'react-native';
+import { getStorage } from 'firebase/storage';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -23,6 +24,8 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const database = getFirestore(app);
+const storage = getStorage(app);
+
 
 let auth;
 if (Platform.OS === 'web') {
@@ -33,4 +36,4 @@ if (Platform.OS === 'web') {
   });
 }
 
-export { app, database, auth };
+export { app, database, auth, storage };
