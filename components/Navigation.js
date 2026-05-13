@@ -6,7 +6,7 @@ import LoginPage from './LoginPage';
 import { HomePage } from './HomePage';
 import { DetailsPage } from './DetailPage';
 import { CreatePage } from './CreatePage';
-import { ProfilePage } from './ProfilePage';
+import  ProfilePage from './ProfilePage';
 import { MapPage } from './MapPage';
 
 const Stack = createNativeStackNavigator();

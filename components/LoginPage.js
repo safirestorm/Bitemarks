@@ -2,7 +2,7 @@ import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, Text, View, TextInput, Platform, TouchableOpacity, Alert } from 'react-native';
 import { useState, useEffect } from 'react';
 import { database, auth } from '../firebase';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, setDoc, doc } from 'firebase/firestore';
 import {
   getAuth,
   signInWithEmailAndPassword,
@@ -27,6 +27,7 @@ export default function LoginPage({ navigation }) {
   const [enteredPassword, setEnteredPassword] = useState('');
   const [userId, setUserId] = useState(null);
   const [isLogin, setIsLogin] = useState(true);
+  const [enteredUsername, setEnteredUsername] = useState('');
 
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: 'YOUR_ANDROID_CLIENT_ID',
@@ -67,7 +68,12 @@ export default function LoginPage({ navigation }) {
   async function signup() {
     try {
       const credentials = await createUserWithEmailAndPassword(auth, enteredEmail, enteredPassword);
-      setUserId(credentials.user.uid);
+      await setDoc(doc(database, 'users', credentials.user.uid), {
+      uid: credentials.user.uid,
+      username: enteredUsername,
+      email: enteredEmail,
+      createdAt: new Date(),
+    });
       navigation.replace('Tabs');
     } catch (error) {
       Alert.alert('Oprettelse fejlede', error.message);
@@ -80,6 +86,16 @@ export default function LoginPage({ navigation }) {
         {isLogin ? 'Log ind' : 'Opret konto'}
       </Text>
 
+
+      {!isLogin && (
+      <TextInput
+        style={{borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:12, marginBottom:12}}
+        placeholder="Brugernavn"
+        autoCapitalize="none"
+        value={enteredUsername}
+        onChangeText={setEnteredUsername}
+      />
+      )}
       <TextInput
         style={{borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:12, marginBottom:12}}
         placeholder="Email"
@@ -88,6 +104,7 @@ export default function LoginPage({ navigation }) {
         value={enteredEmail}
         onChangeText={setEnteredEmail}
       />
+
       <TextInput
         style={{borderWidth:1, borderColor:'#ccc', borderRadius:8, padding:12, marginBottom:20}}
         placeholder="Adgangskode"
@@ -95,6 +112,7 @@ export default function LoginPage({ navigation }) {
         value={enteredPassword}
         onChangeText={setEnteredPassword}
       />
+      
 
       <TouchableOpacity
         style={{backgroundColor:'#000', borderRadius:8, padding:14, alignItems:'center', marginBottom:12}}
@@ -104,8 +122,9 @@ export default function LoginPage({ navigation }) {
 
       <TouchableOpacity onPress={() => setIsLogin(!isLogin)}>
         <Text style={{textAlign:'center', color:'#555'}}>
-          {isLogin ? 'Ingen konto? Opret en' : 'Har allerede en konto? Log ind'}
+          {isLogin ? 'Opret konto' : 'Log ind'}
         </Text>
+        
       </TouchableOpacity>
     </View>
   );
