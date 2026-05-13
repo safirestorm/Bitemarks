@@ -10,30 +10,30 @@ import {
   ScrollView,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { auth, database, storage } from '../firebase';                    // storage hentes fra firebase.js
+import { auth, database, storage } from '../firebase';                    
 import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
 import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';      // IKKE fra firestore
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';     
 
 export default function ProfilePage({ navigation }) {
   const [user, setUser] = useState(null);
-  const [username, setUsername] = useState('');       // var null — skal være tom streng
+  const [username, setUsername] = useState('');     
   const [photoURL, setPhotoURL] = useState(null);
-  const [uploading, setUploading] = useState(false);  // var null — skal være false
-  const [saving, setSaving] = useState(false);        // var null — skal være false
+  const [uploading, setUploading] = useState(false); 
+  const [saving, setSaving] = useState(false);       
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {  // stort F rettet
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {  
       if (!firebaseUser) {
-        navigation.replace('Login');                  // uden .js
+        navigation.replace('Login');                 
         return;
       }
       setUser(firebaseUser);
-      setPhotoURL(firebaseUser.photoURL);             // var firebaseUser, photoURL — manglede dot
+      setPhotoURL(firebaseUser.photoURL);             
 
       try {
         const snap = await getDoc(doc(database, 'users', firebaseUser.uid));
-        if (snap.exists()) {                          // var snap.exist() — manglede s
+        if (snap.exists()) {                          
           setUsername(snap.data().username ?? '');
         }
       } catch (e) {
@@ -78,8 +78,7 @@ export default function ProfilePage({ navigation }) {
       );
 
       setPhotoURL(downloadURL);
-      Alert.alert('Profilbillede gemt');              // var Alert,alert — komma i stedet for dot
-    } catch (e) {
+      Alert.alert('Profilbillede gemt');            
       Alert.alert('Fejl', 'Kunne ikke uploade billede: ' + e.message);
     } finally {
       setUploading(false);
@@ -103,9 +102,9 @@ export default function ProfilePage({ navigation }) {
     }
   }
 
-  async function handleLogout() {                     // var handeLogout — manglede l
+  async function handleLogout() {                  
     await signOut(auth);
-    navigation.replace('Login');                      // uden .js
+    navigation.replace('Login');                   
   }
 
   if (!user) {
