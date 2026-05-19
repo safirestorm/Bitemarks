@@ -1,8 +1,9 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import MapView from "react-native-maps";
 import { useState } from "react";
+import { FAB } from 'react-native-elements';
 
-export function HomePage() {
+export function HomePage({ navigation }) {
 
   const [view, setView] = useState('list'); // Sets litsview as default
 
@@ -32,6 +33,10 @@ export function HomePage() {
           <Text>Liste placeholder</Text>
         </View>
       )}
+
+      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('Create')}>
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -68,5 +73,21 @@ const styles = StyleSheet.create({
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
+  },
+  fab: {
+      position: 'absolute',
+      bottom: 24,
+      right: 24,
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: '#333',
+      justifyContent: 'center',
+      alignItems: 'center',
+  },
+  fabText: {
+      color: '#fff',
+      fontSize: 28,
+      lineHeight: 30,
   },
 });
