@@ -5,47 +5,119 @@ import {  View,
           SectionList,
           ActivityIndicator, } from "react-native";
 import MapView from "react-native-maps";
-import { useState } from "react";
 import { FAB } from 'react-native-elements';
 import { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "./firebaseConfig";
+import { db } from "../firebase";
 
 
 export function HomePage({ navigation }) {
 
   const [view, setView] = useState('list'); // Sets litsview as default
+  const [section, setSection] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  return(
+  useEffect(() => {
+    async function fetchResturants() {
+      try {
+        const snapshot = await getDocs(collection(db, 'resturants'))
+
+        const resturants = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+
+        const group = {};
+        for (const r of resturants) {
+          const letter = r.name[0].toUpperCase();
+          if (!group[letter]) group[letter] = [];
+          group[letter].push(r);
+        }
+
+        setSection(
+          Object.keys(group)
+          .sort()
+          .map((letter) => ({ title: length, data: group[letter] }))
+        );
+      } catch (error) {
+        setError(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchResturants();
+  }, []);
+
+
+
+  return (
     <View style={styles.container}>
       <View style={styles.toggleContainer}>
         <TouchableOpacity
-          style={[styles.toggleButton, view === 'list' && styles.activeButton]}
-            onPress={() => setView('list')}
-          >
-            <Text style={[styles.toggleText, view === 'list' && styles.activeText]}>Liste</Text>
+          style={[styles.toggleButton, view === "list" && styles.activeButton]}
+          onPress={() => setView("list")}
+        >
+          <Text style={[styles.toggleText, view === "list" && styles.activeText]}>
+            Liste
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.toggleButton, view === 'map' && styles.activeButton]}
-            onPress={() => setView('map')}
-          >
-            <Text style={[styles.toggleText, view === 'map' && styles.activeText]}>Kort</Text>
+          style={[styles.toggleButton, view === "map" && styles.activeButton]}
+          onPress={() => setView("map")}
+        >
+          <Text style={[styles.toggleText, view === "map" && styles.activeText]}>
+            Kort
+          </Text>
         </TouchableOpacity>
       </View>
-      
-      {view === 'map' ? (
+ 
+      {view === "map" ? (
         <View style={styles.content}>
           <Text>Kort placeholder</Text>
         </View>
-        ) : (
+      ) : loading ? (
         <View style={styles.content}>
-          <Text>Liste placeholder</Text>
+          <ActivityIndicator size="large" color="#333" />
         </View>
+      ) : error ? (
+        <View style={styles.content}>
+          <Text style={styles.errorText}>Kunne ikke hente restauranter.</Text>
+        </View>
+      ) : (
+        <SectionList
+          sections={sections}
+          keyExtractor={(item) => item.id}
+          stickySectionHeadersEnabled={true}
+          renderSectionHeader={({ section }) => (
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionHeaderText}>{section.title}</Text>
+            </View>
+          )}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={styles.item} activeOpacity={0.7}>
+              <View style={styles.itemRow}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                {item.cuisine && (
+                  <Text style={styles.itemCuisine}>{item.cuisine}</Text>
+                )}
+              </View>
+              {item.address && (
+                <Text style={styles.itemAddress} numberOfLines={1}>
+                  {item.address}
+                </Text>
+              )}
+            </TouchableOpacity>
+          )}
+          ListEmptyComponent={
+            <View style={styles.content}>
+              <Text style={styles.emptyText}>Ingen restauranter fundet.</Text>
+            </View>
+          }
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          contentContainerStyle={styles.listContent}
+        />
       )}
-
-      <TouchableOpacity style={styles.fab} onPress={() => navigation.navigate('Create')}>
-        <Text style={styles.fabText}>+</Text>
-      </TouchableOpacity>
     </View>
   );
 }
