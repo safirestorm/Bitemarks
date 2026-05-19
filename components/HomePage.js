@@ -1,6 +1,14 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {  View, 
+          Text, 
+          TouchableOpacity, 
+          StyleSheet,
+          SectionList,
+          ActivityIndicator, } from "react-native";
 import MapView from "react-native-maps";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "./firebaseConfig";
+
 
 export function HomePage() {
 
