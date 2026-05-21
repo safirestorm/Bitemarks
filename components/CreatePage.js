@@ -3,8 +3,9 @@ import { auth, database } from "../firebase";
 import { doc, setDoc, collection, addDoc } from "firebase/firestore";
 import { useState } from "react";
 import { Rating } from '@kolking/react-native-rating';
+import { GOOGLE_MAPS_API_KEY } from "../config";
 
-export function CreatePage() {
+export function CreatePage({ navigation }) {
   const uid = auth.currentUser.uid; // Saves the users id in a variable
   const [name, setName] = useState('')
   const [category, setCategory] = useState('')
@@ -12,14 +13,29 @@ export function CreatePage() {
   const [rating, setRating] = useState('')
   const [notes, setNotes] = useState('')
 
+  async function fetchLocation(){
+    try {
+      const response = await fetch("https://maps.googleapis.com/maps/api/geocode/json?address=" + encodeURIComponent(location) + "&key=" + GOOGLE_MAPS_API_KEY)
+      const data = await response.json()
+      const { lat, lng } = data.results[0].geometry.location
+      return { lat, lng }
+    }catch(error){
+      alert("reply from Google " + error)
+    }
+  }
+
   async function addRestaurant(){
+    const coordinates = await fetchLocation()
     await addDoc(collection(database, "users", uid, "restaurants"), {
       name: name,
       category: category,
       location: location,
+      lat: coordinates.lat,
+      lng: coordinates.lng,
       rating: rating,
       notes: notes
     })
+    navigation.navigate('Tabs')
   }
 
   return(
