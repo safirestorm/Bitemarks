@@ -1,6 +1,8 @@
-import { View, Text } from "react-native";
+import { View, Text, StyleSheet, ScrollView } from "react-native";
 
-export function DetailsPage() {
+
+export function DetailsPage({ route }) {
+  
     return(
         <View>
         <Text>Placeholder</Text>
