@@ -29,7 +29,12 @@ export function RootStack() {
             <Stack.Screen 
                 name='Detail' 
                 component={DetailsPage}
-                options={{ title: 'Detaljer' }} 
+                options={{ 
+                    title: 'Detaljer',
+                    presentation: 'formSheet',
+                    sheetAllowedDetents: 'fitToContents',
+                    sheetGrabberVisible: true,
+                 }} 
             />
             <Stack.Screen 
                 name='Create' 
