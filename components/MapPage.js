@@ -2,9 +2,17 @@ import { View, Text, StyleSheet } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { useEffect, useRef, useState } from "react";
 import * as Location from 'expo-location'
+import { auth, database } from "../firebase";
+import { doc, getDocs, collection } from "firebase/firestore"
+import { useCollection } from 'react-firebase-hooks/firestore'
+import { DataConnect } from "firebase/data-connect";
 
-export function MapPage() {
+
+export function MapPage({ navigation }) {
+  const uid = auth.currentUser.uid; // Saves the users id in a variable
   const [markers, setMarkers] = useState([])
+  const [values, loading, error] = useCollection(collection(database, "users", uid, "restaurants"))
+  const data = values?.docs.map((doc)=>({...doc.data(), id:doc.id})) ?? []
 
   // Bestemmer hvilken andel af verdenen kortet viser
   const [region, setRegion] = useState({
@@ -71,12 +79,12 @@ export function MapPage() {
         region={region}
         onLongPress={addPlace}
       >
-        {markers.map(marker =>(
+        {data.map(restaurant =>(
           <Marker
-            coordinate={marker.coordinate}
-            key={marker.key}
-            title={marker.title}
-            onPress={() => onPlacePressed(marker.title)}
+            key={restaurant.id}
+            coordinate={{ latitude: restaurant.lat, longitude: restaurant.lng }}
+            title={restaurant.name}
+            onPress={() => navigation.navigate('Detail', { restaurant })}
           />
         ))}   
       </MapView> 
