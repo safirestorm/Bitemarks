@@ -7,8 +7,8 @@ import {  View,
 import MapView from "react-native-maps";
 import { FAB } from 'react-native-elements';
 import { useState, useEffect } from "react";
-import { collectionGroup, getDocs } from "firebase/firestore";
-import { database } from "../firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { database, auth } from "../firebase";
 
 
 export function HomePage({ navigation }) {
@@ -21,7 +21,8 @@ export function HomePage({ navigation }) {
   useEffect(() => {
     async function fetchRestaurants() {
       try {
-        const snapshot = await getDocs(collectionGroup(database, 'restaurants'))
+        const user = auth.currentUser;
+        const snapshot = await getDocs(collection(database, 'users', user.uid, 'restaurants'))
 
         const restaurants = snapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
