@@ -3,14 +3,11 @@ import MapView, { Marker } from "react-native-maps";
 import { useEffect, useRef, useState } from "react";
 import * as Location from 'expo-location'
 import { auth, database } from "../firebase";
-import { doc, getDocs, collection } from "firebase/firestore"
+import { doc, collection } from "firebase/firestore"
 import { useCollection } from 'react-firebase-hooks/firestore'
-import { DataConnect } from "firebase/data-connect";
-
 
 export function MapPage({ navigation }) {
   const uid = auth.currentUser.uid; // Saves the users id in a variable
-  const [markers, setMarkers] = useState([])
   const [values, loading, error] = useCollection(collection(database, "users", uid, "restaurants"))
   const data = values?.docs.map((doc)=>({...doc.data(), id:doc.id})) ?? []
 
@@ -59,13 +56,8 @@ export function MapPage({ navigation }) {
   }, []) // Et tomt array i slutningen betyder at denne useEffect kun skal køre én gang
 
   function addPlace(data) {
-    const {latitude, longitude} = data.nativeEvent.coordinate
-    const newMarker = {
-      coordinate: {latitude, longitude},
-      key: data.timeStamp,
-      title:"Great Place"
-    }
-    setMarkers([...markers, newMarker])
+    const { latitude, longitude } = data.nativeEvent.coordinate
+    navigation.navigate('Create', { latitude, longitude })
   }
 
   function onPlacePressed(text) {
