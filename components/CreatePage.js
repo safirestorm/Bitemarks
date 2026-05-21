@@ -1,19 +1,22 @@
 import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity } from "react-native";
 import { auth, database } from "../firebase";
 import { doc, setDoc, collection, addDoc } from "firebase/firestore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Rating } from '@kolking/react-native-rating';
 import { GOOGLE_MAPS_API_KEY } from "../config";
 
-export function CreatePage({ navigation }) {
+export function CreatePage({ navigation, route }) {
   const uid = auth.currentUser.uid; // Saves the users id in a variable
+  const latitude = route.params?.latitude; // Checks if a param exists
+  const longitude = route.params?.longitude;
   const [name, setName] = useState('')
   const [category, setCategory] = useState('')
   const [location, setLocation] = useState('')
   const [rating, setRating] = useState('')
   const [notes, setNotes] = useState('')
 
-  async function fetchLocation(){
+  // Coverts a written adress into coordinates through google API
+  async function fetchCoordinates(){
     try {
       const response = await fetch("https://maps.googleapis.com/maps/api/geocode/json?address=" + encodeURIComponent(location) + "&key=" + GOOGLE_MAPS_API_KEY)
       const data = await response.json()
@@ -24,14 +27,43 @@ export function CreatePage({ navigation }) {
     }
   }
 
+  // Coverts coordinates into and address through google API
+  async function fetchAddress() {
+    try {
+      const response = await fetch("https://maps.googleapis.com/maps/api/geocode/json?latlng=" + latitude + "," +longitude + "&key=" + GOOGLE_MAPS_API_KEY)
+      const data = await response.json()
+      const address = data.results[0].formatted_address
+      return address
+    }catch(error){
+      alert("reply from Google " + error)
+    }
+  }
+
+  // Checks if there's coordinates and adds address to location
+  useEffect(() => {
+    if (latitude && longitude) {
+        fetchAddress().then(address => setLocation(address))
+    }
+  }, [])
+
   async function addRestaurant(){
-    const coordinates = await fetchLocation()
+    let lat, lng;
+
+    if (latitude && longitude){
+      lat = latitude
+      lng = longitude
+    } else {
+      const coordinates = await fetchCoordinates()
+      lat = coordinates.lat
+      lng = coordinates.lng
+    }
+
     await addDoc(collection(database, "users", uid, "restaurants"), {
       name: name,
       category: category,
       location: location,
-      lat: coordinates.lat,
-      lng: coordinates.lng,
+      lat: lat,
+      lng: lng,
       rating: rating,
       notes: notes
     })
