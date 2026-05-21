@@ -7,37 +7,37 @@ import {  View,
 import MapView from "react-native-maps";
 import { FAB } from 'react-native-elements';
 import { useState, useEffect } from "react";
-import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { collectionGroup, getDocs } from "firebase/firestore";
+import { database } from "../firebase";
 
 
 export function HomePage({ navigation }) {
 
   const [view, setView] = useState('list'); // Sets litsview as default
-  const [section, setSection] = useState([]);
+  const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchResturants() {
+    async function fetchRestaurants() {
       try {
-        const snapshot = await getDocs(collection(db, 'resturants'))
+        const snapshot = await getDocs(collectionGroup(database, 'restaurants'))
 
-        const resturants = snapshot.docs
+        const restaurants = snapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
         .sort((a, b) => a.name.localeCompare(b.name));
 
         const group = {};
-        for (const r of resturants) {
+        for (const r of restaurants) {
           const letter = r.name[0].toUpperCase();
           if (!group[letter]) group[letter] = [];
           group[letter].push(r);
         }
 
-        setSection(
+        setSections(
           Object.keys(group)
           .sort()
-          .map((letter) => ({ title: length, data: group[letter] }))
+          .map((letter) => ({ title: letter, data: group[letter] }))
         );
       } catch (error) {
         setError(error);
@@ -46,12 +46,12 @@ export function HomePage({ navigation }) {
       }
     }
 
-    fetchResturants();
+    fetchRestaurants();
   }, []);
 
 
 
-  return (
+return (
     <View style={styles.container}>
       <View style={styles.toggleContainer}>
         <TouchableOpacity
@@ -65,6 +65,7 @@ export function HomePage({ navigation }) {
         <TouchableOpacity
           style={[styles.toggleButton, view === "map" && styles.activeButton]}
           onPress={() => setView("map")}
+          
         >
           <Text style={[styles.toggleText, view === "map" && styles.activeText]}>
             Kort
@@ -95,7 +96,10 @@ export function HomePage({ navigation }) {
             </View>
           )}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.item} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.item} activeOpacity={0.7}
+              onPress={() => navigation.navigate("Detail", { restaurant: item })}
+
+            >
               <View style={styles.itemRow}>
                 <Text style={styles.itemName}>{item.name}</Text>
                 {item.cuisine && (
@@ -118,6 +122,13 @@ export function HomePage({ navigation }) {
           contentContainerStyle={styles.listContent}
         />
       )}
+ 
+      <TouchableOpacity
+        style={styles.fab}
+        onPress={() => navigation.navigate("Create")}
+      >
+        <Text style={styles.fabText}>+</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -154,6 +165,58 @@ const styles = StyleSheet.create({
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
+  },
+    sectionHeader: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    backgroundColor: "rgba(247,247,247,1.0)",
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#ddd",
+  },
+  sectionHeaderText: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#555",
+  },
+  item: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: "#fff",
+  },
+  itemRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  itemName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#222",
+  },
+  itemCuisine: {
+    fontSize: 13,
+    color: "#888",
+  },
+  itemAddress: {
+    marginTop: 3,
+    fontSize: 13,
+    color: "#aaa",
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: "#eee",
+    marginLeft: 16,
+  },
+  listContent: {
+    paddingBottom: 100,
+  },
+  errorText: {
+    color: "#c0392b",
+    fontSize: 16,
+  },
+  emptyText: {
+    color: "#999",
+    fontSize: 16,
   },
   fab: {
       position: 'absolute',
