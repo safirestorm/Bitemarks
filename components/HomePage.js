@@ -18,37 +18,43 @@ export function HomePage({ navigation }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    async function fetchRestaurants() {
-      try {
-        const user = auth.currentUser;
-        const snapshot = await getDocs(collection(database, 'users', user.uid, 'restaurants'))
+  async function fetchRestaurants() {
+    try {
+      const user = auth.currentUser;
+      if (!user) return;
 
-        const restaurants = snapshot.docs
+      setLoading(true);
+      setError(null);
+      setSections([]);
+
+      const snapshot = await getDocs(collection(database, "users", user.uid, "restaurants"));
+
+      const restaurants = snapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((r) => r.name) 
         .sort((a, b) => a.name.localeCompare(b.name));
 
-        const group = {};
-        for (const r of restaurants) {
-          const letter = r.name[0].toUpperCase();
-          if (!group[letter]) group[letter] = [];
-          group[letter].push(r);
-        }
+      const group = {};
+      for (const r of restaurants) {
+        const letter = r.name[0].toUpperCase();
+        if (!group[letter]) group[letter] = [];
+        group[letter].push(r);
+      }
 
-        setSections(
-          Object.keys(group)
+      setSections(
+        Object.keys(group)
           .sort()
           .map((letter) => ({ title: letter, data: group[letter] }))
-        );
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
+      );
+    } catch (err) {
+      setError(err);
+    } finally {
+      setLoading(false);
     }
+  }
 
-    fetchRestaurants();
-  }, []);
-
+  fetchRestaurants();
+}, [auth.currentUser?.uid]);
 
 
 return (

@@ -71,7 +71,7 @@ export function MapPage({ navigation }) {
         region={region}
         onLongPress={addPlace}
       >
-        {data.map(restaurant =>(
+        {data.filter(r => r.lat && r.lng).map(restaurant => (
           <Marker
             key={restaurant.id}
             coordinate={{ latitude: restaurant.lat, longitude: restaurant.lng }}
