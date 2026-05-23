@@ -12,7 +12,6 @@ import { database, auth } from "../firebase";
 
 
 export function HomePage({ navigation }) {
-
   const [view, setView] = useState('list'); // Sets litsview as default
   const [sections, setSections] = useState([]);
   const [loading, setLoading] = useState(true);
