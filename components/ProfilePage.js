@@ -105,7 +105,6 @@ export default function ProfilePage({ navigation }) {
 
   async function handleLogout() {
     await signOut(auth);
-    navigation.replace("Login");
   }
 
   if (!user) {
