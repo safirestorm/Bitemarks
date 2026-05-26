@@ -1,6 +1,6 @@
 import {  View, 
           Text, 
-          TouchableOpacity, 
+          TouchableOpacity,
           StyleSheet,
           SectionList,
           ActivityIndicator, } from "react-native";
