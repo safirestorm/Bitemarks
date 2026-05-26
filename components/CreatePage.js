@@ -77,6 +77,15 @@ export function CreatePage({ navigation, route }) {
   }, []);
 
   async function addRestaurant() {
+    if(!name.trim()) {
+      Alert.alert('Manglende oplysninger', 'Du skal indtaste et navn.');
+      return;
+    }
+    if (!location.trim()) {
+      Alert.alert('Manglende oplysninger', 'Du skal indtaste en adresse.');
+      return;
+    }
+
     let lat, lng;
 
     if (latitude && longitude) {

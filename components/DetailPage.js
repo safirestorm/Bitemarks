@@ -67,6 +67,15 @@ export function DetailsPage({ route, navigation }) {
   }
 
   async function saveHandle() {
+    if(!name.trim()) {
+      Alert.alert('Manglende oplysninger', 'Du skal indtaste et navn.');
+      return;
+    }
+    if (!location.trim()) {
+      Alert.alert('Manglende oplysninger', 'Du skal indtaste en adresse.');
+      return;
+    }
+    
     try {
       const { lat, lng } = await fetchCoordinates(location);
       await updateDoc(

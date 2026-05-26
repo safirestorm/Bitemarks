@@ -24,7 +24,7 @@ export function RootStack() {
       <Stack.Screen
         name="Tabs"
         component={BottomTab}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: '' }}
       />
       <Stack.Screen
         name="Detail"
