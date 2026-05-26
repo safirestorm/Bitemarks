@@ -8,6 +8,7 @@ import { DetailsPage } from './DetailPage';
 import { CreatePage } from './CreatePage';
 import  ProfilePage from './ProfilePage';
 import { MapPage } from './MapPage';
+import { Ionicons } from '@expo/vector-icons';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -53,19 +54,28 @@ export function BottomTab() {
             name="Home" 
             component={HomePage}
             options={{
-                title: 'Startside'
+                title: 'Startside',
+                tabBarIcon: ({ color, size}) => (
+                    <Ionicons name="restaurant-outline" color={color} size={size} />
+                ),
             }} />
             <Tab.Screen 
             name="Map" 
             component={MapPage}
             options={{
-                title: 'Kort'
+                title: 'Kort',
+                tabBarIcon: ({ color, size}) => (
+                    <Ionicons name="map-outline" color={color} size={size} />
+                ),
             }} />
             <Tab.Screen 
             name="Profile" 
             component={ProfilePage}
             options={{
-                title: 'Min side'
+                title: 'Min side',
+                tabBarIcon: ({ color, size}) => (
+                    <Ionicons name="person-outline" color={color} size={size} />
+                ),
             }} />
         </Tab.Navigator>
     )

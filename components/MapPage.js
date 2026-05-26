@@ -60,10 +60,6 @@ export function MapPage({ navigation }) {
     navigation.navigate('Create', { latitude, longitude })
   }
 
-  function onPlacePressed(text) {
-     // Skal tilføjes en metode til hvad der skal vises når man trykker på en pin 
-  }
-
   return(
     <View>
       <MapView 

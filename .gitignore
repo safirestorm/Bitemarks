@@ -42,4 +42,6 @@ yarn-error.*
 /android
 
 .config.js
+.idea
+
 .claude
