@@ -41,7 +41,7 @@ yarn-error.*
 /ios
 /android
 
-.config.js
+config.js
 .idea
 
 .claude
