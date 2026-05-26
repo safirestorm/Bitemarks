@@ -1,38 +1,134 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from "react-native";
 import { Rating } from '@kolking/react-native-rating';
+import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
+import { auth, database } from '../firebase';
+import { GOOGLE_MAPS_API_KEY } from "../config";
+import { useState } from 'react';
 
-export function DetailsPage({ route }) {
+export function DetailsPage({ route, navigation }) {
   const { restaurant } = route.params;
 
-return (
+  const [isEditing, setIsEditing] = useState(false);
+  const [name, setName] = useState(restaurant.name);
+  const [category, setCategory] = useState(restaurant.category);
+  const [location, setLocation] = useState(restaurant.location);
+  const [rating, setRating] = useState(restaurant.rating);
+  const [notes, setNotes] = useState(restaurant.notes);
+
+  async function fetchCoordinates(address) {
+    const response = await fetch("https://maps.googleapis.com/maps/api/geocode/json?address=" + encodeURIComponent(address) + "&key=" + GOOGLE_MAPS_API_KEY);
+    const data = await response.json();
+    const { lat, lng } = data.results[0].geometry.location;
+    return { lat, lng };
+  }
+
+  async function deleteHandle() {
+    Alert.alert(
+      "Slet restaurant",
+      `Er du sikker du vil slette ${restaurant.name}?`,
+      [
+        { text: 'Annuller', style: 'cancel' },
+        {
+          text: "Slet", style: 'destructive',
+          onPress: async () => {
+            const uid = auth.currentUser.uid;
+            await deleteDoc(doc(database, 'users', uid, 'restaurants', restaurant.id));
+            navigation.goBack();
+          },
+        },
+      ]
+    );
+  }
+
+  async function saveHandle() {
+    try {
+      const uid = auth.currentUser.uid;
+      const { lat, lng } = await fetchCoordinates(location);
+      await updateDoc(doc(database, 'users', uid, 'restaurants', restaurant.id), {
+        name, category, location, rating, notes, lat, lng,
+      });
+      setIsEditing(false);
+      navigation.goBack();
+    } catch (error) {
+      console.log("Fejl:", error);
+    }
+  }
+
+  return (
     <ScrollView style={styles.container}>
- 
+
       <View style={styles.header}>
-        <Text style={styles.name}>{restaurant.name}</Text>
-        <Text style={styles.category}>{restaurant.category}</Text>
+        <Text style={styles.name}>{name}</Text>
+        <Text style={styles.category}>{category}</Text>
       </View>
- 
+
       <View style={styles.divider} />
- 
+
       <View style={styles.section}>
- 
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Navn</Text>
+          {isEditing ? (
+            <TextInput style={styles.input} value={name} onChangeText={setName} />
+          ) : (
+            <Text style={styles.value}>{name}</Text>
+          )}
+        </View>
+
+        <View style={styles.row}>
+          <Text style={styles.label}>Kategori</Text>
+          {isEditing ? (
+            <TextInput style={styles.input} value={category} onChangeText={setCategory} />
+          ) : (
+            <Text style={styles.value}>{category}</Text>
+          )}
+        </View>
+
         <View style={styles.row}>
           <Text style={styles.label}>Lokation</Text>
-          <Text style={styles.value}>{restaurant.location}</Text>
+          {isEditing ? (
+            <TextInput style={styles.input} value={location} onChangeText={setLocation} />
+          ) : (
+            <Text style={styles.value}>{location}</Text>
+          )}
         </View>
- 
+
         <View style={styles.row}>
           <Text style={styles.label}>Rating</Text>
-          <Rating size={30} rating={restaurant.rating} disabled />
+          <Rating size={30} rating={rating} disabled={!isEditing} onChange={setRating} />
         </View>
- 
+
         <View style={styles.row}>
           <Text style={styles.label}>Noter</Text>
-          <Text style={styles.value}>{restaurant.notes || "Ingen noter"}</Text>
+          {isEditing ? (
+            <TextInput style={[styles.input, styles.multiline]} value={notes} onChangeText={setNotes} multiline numberOfLines={4} />
+          ) : (
+            <Text style={styles.value}>{notes || "Ingen noter"}</Text>
+          )}
         </View>
- 
+
       </View>
- 
+
+      {isEditing ? (
+        <>
+          <TouchableOpacity style={styles.saveButton} onPress={saveHandle}>
+            <Text style={styles.buttonText}>Gem</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.cancelButton} onPress={() => setIsEditing(false)}>
+            <Text style={styles.cancelText}>Annuller</Text>
+          </TouchableOpacity>
+        </>
+      ) : (
+        <>
+          <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(true)}>
+            <Text style={styles.buttonText}>Rediger</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.deleteButton} onPress={deleteHandle}>
+            <Text style={styles.buttonText}>Slet</Text>
+          </TouchableOpacity>
+        </>
+      )}
+
     </ScrollView>
   );
 }
@@ -81,5 +177,59 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 16,
     color: "#222",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    fontSize: 16,
+  },
+  multiline: {
+    height: 100,
+    textAlignVertical: "top",
+  },
+  editButton: {
+    margin: 24,
+    marginBottom: 8,
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: "#333",
+    alignItems: "center",
+  },
+  saveButton: {
+    margin: 24,
+    marginBottom: 8,
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: "#333",
+    alignItems: "center",
+  },
+  cancelButton: {
+    marginHorizontal: 24,
+    marginBottom: 24,
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    alignItems: "center",
+  },
+  deleteButton: {
+    marginHorizontal: 24,
+    marginBottom: 24,
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: "#c0392b",
+    alignItems: "center",
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
+  },
+  cancelText: {
+    color: "#333",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
