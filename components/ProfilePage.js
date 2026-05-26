@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,36 +8,36 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
-} from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { auth, database, storage } from '../firebase';                    
-import { onAuthStateChanged, signOut, updateProfile } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';     
+} from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { auth, database, storage } from "../firebase";
+import { onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 export default function ProfilePage({ navigation }) {
   const [user, setUser] = useState(null);
-  const [username, setUsername] = useState('');     
+  const [username, setUsername] = useState("");
   const [photoURL, setPhotoURL] = useState(null);
-  const [uploading, setUploading] = useState(false); 
-  const [saving, setSaving] = useState(false);       
+  const [uploading, setUploading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {  
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
-        navigation.replace('Login');                 
+        navigation.replace("Login");
         return;
       }
       setUser(firebaseUser);
-      setPhotoURL(firebaseUser.photoURL);             
+      setPhotoURL(firebaseUser.photoURL);
 
       try {
-        const snap = await getDoc(doc(database, 'users', firebaseUser.uid));
-        if (snap.exists()) {                          
-          setUsername(snap.data().username ?? '');
+        const snap = await getDoc(doc(database, "users", firebaseUser.uid));
+        if (snap.exists()) {
+          setUsername(snap.data().username ?? "");
         }
       } catch (e) {
-        console.log('Fejl i Firestore', e);
+        console.log("Fejl i Firestore", e);
       }
     });
     return unsubscribe;
@@ -45,8 +45,8 @@ export default function ProfilePage({ navigation }) {
 
   async function pickAndUploadImage() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Giv adgang til dine billeder');
+    if (status !== "granted") {
+      Alert.alert("Giv adgang til dine billeder");
       return;
     }
 
@@ -72,14 +72,15 @@ export default function ProfilePage({ navigation }) {
       await updateProfile(auth.currentUser, { photoURL: downloadURL });
 
       await setDoc(
-        doc(database, 'users', user.uid),
+        doc(database, "users", user.uid),
         { photoURL: downloadURL },
-        { merge: true }
+        { merge: true },
       );
 
       setPhotoURL(downloadURL);
-      Alert.alert('Profilbillede gemt');            
-      Alert.alert('Fejl', 'Kunne ikke uploade billede: ' + e.message);
+      Alert.alert("Profilbillede gemt");
+    } catch (e) {
+      Alert.alert("Fejl", "Kunne ikke uploade billede: " + e.message);
     } finally {
       setUploading(false);
     }
@@ -90,48 +91,65 @@ export default function ProfilePage({ navigation }) {
     setSaving(true);
     try {
       await setDoc(
-        doc(database, 'users', user.uid),
+        doc(database, "users", user.uid),
         { username: username.trim() },
-        { merge: true }
+        { merge: true },
       );
-      Alert.alert('Brugernavn opdateret');
+      Alert.alert("Brugernavn opdateret");
     } catch (e) {
-      Alert.alert('Fejl', e.message);
+      Alert.alert("Fejl", e.message);
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleLogout() {                  
+  async function handleLogout() {
     await signOut(auth);
-    navigation.replace('Login');                   
+    navigation.replace("Login");
   }
 
   if (!user) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator />
       </View>
     );
   }
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 24, backgroundColor: '#fff', flexGrow: 1 }}>
-
-      <View style={{ alignItems: 'center', marginBottom: 32 }}>
+    <ScrollView
+      contentContainerStyle={{
+        padding: 24,
+        backgroundColor: "#fff",
+        flexGrow: 1,
+      }}
+    >
+      <View style={{ alignItems: "center", marginBottom: 32 }}>
         <TouchableOpacity onPress={pickAndUploadImage} disabled={uploading}>
           {photoURL ? (
             <Image
               source={{ uri: photoURL }}
-              style={{ width: 100, height: 100, borderRadius: 50, borderWidth: 1, borderColor: '#ccc' }}
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                borderWidth: 1,
+                borderColor: "#ccc",
+              }}
             />
           ) : (
-            <View style={{
-              width: 100, height: 100, borderRadius: 50,
-              backgroundColor: '#e0e0e0', justifyContent: 'center', alignItems: 'center',
-            }}>
-              <Text style={{ fontSize: 36, fontWeight: 'bold', color: '#666' }}>
-                {user.email?.[0]?.toUpperCase() ?? '?'}
+            <View
+              style={{
+                width: 100,
+                height: 100,
+                borderRadius: 50,
+                backgroundColor: "#e0e0e0",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={{ fontSize: 36, fontWeight: "bold", color: "#666" }}>
+                {user.email?.[0]?.toUpperCase() ?? "?"}
               </Text>
             </View>
           )}
@@ -140,8 +158,11 @@ export default function ProfilePage({ navigation }) {
         {uploading ? (
           <ActivityIndicator style={{ marginTop: 8 }} />
         ) : (
-          <TouchableOpacity onPress={pickAndUploadImage} style={{ marginTop: 8 }}>
-            <Text style={{ color: '#555', fontSize: 13 }}>Skift billede</Text>
+          <TouchableOpacity
+            onPress={pickAndUploadImage}
+            style={{ marginTop: 8 }}
+          >
+            <Text style={{ color: "#555", fontSize: 13 }}>Skift billede</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -152,8 +173,12 @@ export default function ProfilePage({ navigation }) {
       <Text style={[labelStyle, { marginTop: 20 }]}>Brugernavn</Text>
       <TextInput
         style={{
-          borderWidth: 1, borderColor: '#ccc', borderRadius: 8,
-          padding: 12, fontSize: 16, marginBottom: 8,
+          borderWidth: 1,
+          borderColor: "#ccc",
+          borderRadius: 8,
+          padding: 12,
+          fontSize: 16,
+          marginBottom: 8,
         }}
         value={username}
         onChangeText={setUsername}
@@ -162,24 +187,34 @@ export default function ProfilePage({ navigation }) {
       />
       <TouchableOpacity
         style={{
-          backgroundColor: '#000', borderRadius: 8,
-          padding: 12, alignItems: 'center', marginBottom: 32,
+          backgroundColor: "#000",
+          borderRadius: 8,
+          padding: 12,
+          alignItems: "center",
+          marginBottom: 32,
         }}
         onPress={saveUsername}
         disabled={saving}
       >
-        <Text style={{ color: '#fff', fontWeight: '600' }}>
-          {saving ? 'Gemmer...' : 'Gem brugernavn'}
+        <Text style={{ color: "#fff", fontWeight: "600" }}>
+          {saving ? "Gemmer..." : "Gem brugernavn"}
         </Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={handleLogout}>
-        <Text style={{ color: 'red', textAlign: 'center', fontSize: 15 }}>Log ud</Text>
+        <Text style={{ color: "red", textAlign: "center", fontSize: 15 }}>
+          Log ud
+        </Text>
       </TouchableOpacity>
-
     </ScrollView>
   );
 }
 
-const labelStyle = { fontSize: 12, color: '#888', marginBottom: 4, textTransform: 'uppercase', letterSpacing: 0.5 };
-const valueStyle = { fontSize: 16, color: '#111', marginBottom: 4 };
+const labelStyle = {
+  fontSize: 12,
+  color: "#888",
+  marginBottom: 4,
+  textTransform: "uppercase",
+  letterSpacing: 0.5,
+};
+const valueStyle = { fontSize: 16, color: "#111", marginBottom: 4 };

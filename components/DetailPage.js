@@ -1,22 +1,46 @@
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert, TextInput } from "react-native";
-import { Rating } from '@kolking/react-native-rating';
-import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { auth, database } from '../firebase';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  TextInput,
+} from "react-native";
+import { Rating } from "@kolking/react-native-rating";
+import { doc, deleteDoc, updateDoc } from "firebase/firestore";
+import { auth, database } from "../firebase";
 import { GOOGLE_MAPS_API_KEY } from "../config";
-import { useState } from 'react';
+import { useState } from "react";
+import { Picker } from "@react-native-picker/picker";
+
+const CATEGORIES = [
+  "Restaurant",
+  "Café",
+  "Fastfood",
+  "Bar",
+  "Point of interest",
+];
 
 export function DetailsPage({ route, navigation }) {
   const { restaurant } = route.params;
-
+  const uid = auth.currentUser.uid;
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(restaurant.name);
   const [category, setCategory] = useState(restaurant.category);
+  const [cuisine, setCuisine] = useState(restaurant.cuisine);
   const [location, setLocation] = useState(restaurant.location);
   const [rating, setRating] = useState(restaurant.rating);
   const [notes, setNotes] = useState(restaurant.notes);
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false);
 
   async function fetchCoordinates(address) {
-    const response = await fetch("https://maps.googleapis.com/maps/api/geocode/json?address=" + encodeURIComponent(address) + "&key=" + GOOGLE_MAPS_API_KEY);
+    const response = await fetch(
+      "https://maps.googleapis.com/maps/api/geocode/json?address=" +
+        encodeURIComponent(address) +
+        "&key=" +
+        GOOGLE_MAPS_API_KEY,
+    );
     const data = await response.json();
     const { lat, lng } = data.results[0].geometry.location;
     return { lat, lng };
@@ -27,26 +51,37 @@ export function DetailsPage({ route, navigation }) {
       "Slet restaurant",
       `Er du sikker du vil slette ${restaurant.name}?`,
       [
-        { text: 'Annuller', style: 'cancel' },
+        { text: "Annuller", style: "cancel" },
         {
-          text: "Slet", style: 'destructive',
+          text: "Slet",
+          style: "destructive",
           onPress: async () => {
-            const uid = auth.currentUser.uid;
-            await deleteDoc(doc(database, 'users', uid, 'restaurants', restaurant.id));
+            await deleteDoc(
+              doc(database, "users", uid, "restaurants", restaurant.id),
+            );
             navigation.goBack();
           },
         },
-      ]
+      ],
     );
   }
 
   async function saveHandle() {
     try {
-      const uid = auth.currentUser.uid;
       const { lat, lng } = await fetchCoordinates(location);
-      await updateDoc(doc(database, 'users', uid, 'restaurants', restaurant.id), {
-        name, category, location, rating, notes, lat, lng,
-      });
+      await updateDoc(
+        doc(database, "users", uid, "restaurants", restaurant.id),
+        {
+          name,
+          category,
+          cuisine,
+          location,
+          rating,
+          notes,
+          lat,
+          lng,
+        },
+      );
       setIsEditing(false);
       navigation.goBack();
     } catch (error) {
@@ -55,8 +90,7 @@ export function DetailsPage({ route, navigation }) {
   }
 
   return (
-    <ScrollView style={styles.container}>
-
+    <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 50 }}>
       <View style={styles.header}>
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.category}>{category}</Text>
@@ -65,11 +99,14 @@ export function DetailsPage({ route, navigation }) {
       <View style={styles.divider} />
 
       <View style={styles.section}>
-
         <View style={styles.row}>
           <Text style={styles.label}>Navn</Text>
           {isEditing ? (
-            <TextInput style={styles.input} value={name} onChangeText={setName} />
+            <TextInput
+              style={styles.input}
+              value={name}
+              onChangeText={setName}
+            />
           ) : (
             <Text style={styles.value}>{name}</Text>
           )}
@@ -78,16 +115,53 @@ export function DetailsPage({ route, navigation }) {
         <View style={styles.row}>
           <Text style={styles.label}>Kategori</Text>
           {isEditing ? (
-            <TextInput style={styles.input} value={category} onChangeText={setCategory} />
+            <>
+              <TouchableOpacity
+                style={styles.input}
+                onPress={() => setShowCategoryPicker(!showCategoryPicker)}
+              >
+                <Text>{category || "Vælg kategori"}</Text>
+              </TouchableOpacity>
+              {showCategoryPicker && (
+                <Picker
+                  selectedValue={category}
+                  onValueChange={(val) => {
+                    setCategory(val);
+                    setShowCategoryPicker(false);
+                  }}
+                >
+                  {CATEGORIES.map((c) => (
+                    <Picker.Item key={c} label={c} value={c} />
+                  ))}
+                </Picker>
+              )}
+            </>
           ) : (
             <Text style={styles.value}>{category}</Text>
           )}
         </View>
 
         <View style={styles.row}>
+          <Text style={styles.label}>Cuisine</Text>
+          {isEditing ? (
+            <TextInput
+              style={styles.input}
+              value={cuisine}
+              onChangeText={setCuisine}
+            />
+          ) : (
+            <Text style={styles.value}>{cuisine}</Text>
+          )}
+        </View>
+
+        <View style={styles.row}>
           <Text style={styles.label}>Lokation</Text>
           {isEditing ? (
-            <TextInput style={styles.input} value={location} onChangeText={setLocation} />
+            <TextInput
+              style={styles.input}
+              value={location}
+              onChangeText={setLocation}
+            />
           ) : (
             <Text style={styles.value}>{location}</Text>
           )}
@@ -95,18 +169,28 @@ export function DetailsPage({ route, navigation }) {
 
         <View style={styles.row}>
           <Text style={styles.label}>Rating</Text>
-          <Rating size={30} rating={rating} disabled={!isEditing} onChange={setRating} />
+          <Rating
+            size={30}
+            rating={rating}
+            disabled={!isEditing}
+            onChange={setRating}
+          />
         </View>
 
         <View style={styles.row}>
           <Text style={styles.label}>Noter</Text>
           {isEditing ? (
-            <TextInput style={[styles.input, styles.multiline]} value={notes} onChangeText={setNotes} multiline numberOfLines={4} />
+            <TextInput
+              style={[styles.input, styles.multiline]}
+              value={notes}
+              onChangeText={setNotes}
+              multiline
+              numberOfLines={4}
+            />
           ) : (
             <Text style={styles.value}>{notes || "Ingen noter"}</Text>
           )}
         </View>
-
       </View>
 
       {isEditing ? (
@@ -114,13 +198,19 @@ export function DetailsPage({ route, navigation }) {
           <TouchableOpacity style={styles.saveButton} onPress={saveHandle}>
             <Text style={styles.buttonText}>Gem</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.cancelButton} onPress={() => setIsEditing(false)}>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => setIsEditing(false)}
+          >
             <Text style={styles.cancelText}>Annuller</Text>
           </TouchableOpacity>
         </>
       ) : (
         <>
-          <TouchableOpacity style={styles.editButton} onPress={() => setIsEditing(true)}>
+          <TouchableOpacity
+            style={styles.editButton}
+            onPress={() => setIsEditing(true)}
+          >
             <Text style={styles.buttonText}>Rediger</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.deleteButton} onPress={deleteHandle}>
@@ -128,7 +218,6 @@ export function DetailsPage({ route, navigation }) {
           </TouchableOpacity>
         </>
       )}
-
     </ScrollView>
   );
 }
