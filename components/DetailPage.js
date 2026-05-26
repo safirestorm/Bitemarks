@@ -1,8 +1,30 @@
-import { View, Text, StyleSheet, ScrollView } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { Rating } from '@kolking/react-native-rating';
+import { doc, deleteDoc } from 'firebase/firestore';
+import { auth, database} from '../firebase'
 
-export function DetailsPage({ route }) {
+
+export function DetailsPage({ route, navigation }) {
   const { restaurant } = route.params;
+
+async function deletehandle() {
+  Alert.alert(
+    "Slet restaurant",
+    `Er du sikker du vil slette ${restaurant.name}?`,
+    [
+      { text: 'Annuller', style: 'cancel'},
+      { text: "Slet", style: 'destructive',
+        onPress: async () => {
+          const uid = auth.currentUser.uid;
+          await deleteDoc(doc(database, 'users', uid, 'restaurants', restaurant.id));
+          navigation.goBack();
+        },
+      },
+    ]
+  )
+};
+
+
 
 return (
     <ScrollView style={styles.container}>
@@ -30,8 +52,14 @@ return (
           <Text style={styles.label}>Noter</Text>
           <Text style={styles.value}>{restaurant.notes || "Ingen noter"}</Text>
         </View>
- 
+
       </View>
+
+      <TouchableOpacity style={styles.deleteButton} onPress={deletehandle}>
+          <Text style={styles.deleteText}>Slet</Text>
+      </TouchableOpacity>
+
+ 
  
     </ScrollView>
   );
@@ -81,5 +109,17 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 16,
     color: "#222",
+  },
+  deleteButton: {
+    margin: 24,
+    padding: 16,
+    borderRadius: 8,
+    backgroundColor: "#c0392b",
+    alignItems: "center",
+  },
+  deleteText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 16,
   },
 });
