@@ -5,6 +5,7 @@ import * as Location from 'expo-location'
 import { auth, database } from "../firebase";
 import { doc, collection } from "firebase/firestore"
 import { useCollection } from 'react-firebase-hooks/firestore'
+import { Pointer } from 'lucide-react-native';
 
 export function MapPage({ navigation }) {
   const uid = auth.currentUser.uid; // Saves the users id in a variable
@@ -61,7 +62,7 @@ export function MapPage({ navigation }) {
   }
 
   return(
-    <View>
+    <View style={{ flex: 1}}>
       <MapView 
         style={styles.map}
         region={region}
@@ -76,6 +77,11 @@ export function MapPage({ navigation }) {
           />
         ))}   
       </MapView> 
+
+      <View style={styles.infoBubble}>
+        <Pointer size={14} color="#555" />
+        <Text style={styles.infoText}>Hold fingeren på kortet for at tilføje et sted</Text>
+      </View>
     </View>
   );
 }
@@ -84,5 +90,25 @@ const styles = StyleSheet.create({
   map: {
     width:'100%',
     height:'100%'
-  }
+  },
+  infoBubble: {
+    position: 'absolute',
+    top: 12,
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+},
+  infoText: {
+    fontSize: 12,
+    color: '#555',
+},
 })

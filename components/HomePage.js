@@ -87,7 +87,7 @@ return (
           style={styles.map}
           region={region}
         >
-          {data.filter(r => r.lat && r.lng).map(restaurant => (
+          {data.filter(r => r.lat && r.lng && r.name?.toLowerCase().includes(search.toLowerCase())).map(restaurant => (
             <Marker
               key={restaurant.id}
               coordinate={{ latitude: restaurant.lat, longitude: restaurant.lng }}

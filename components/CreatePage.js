@@ -67,7 +67,7 @@ export function CreatePage({ navigation, route }) {
       rating: rating,
       notes: notes
     })
-    navigation.navigate('Tabs')
+    navigation.goBack()
   }
 
   return(
