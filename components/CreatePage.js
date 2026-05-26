@@ -5,6 +5,8 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { auth, database } from "../firebase";
 import { doc, setDoc, collection, addDoc } from "firebase/firestore";
@@ -111,6 +113,7 @@ export function CreatePage({ navigation, route }) {
   }
 
   return (
+    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Tilføj spisested</Text>
 
@@ -180,6 +183,7 @@ export function CreatePage({ navigation, route }) {
         <Text style={styles.buttonText}>Gem spisested</Text>
       </TouchableOpacity>
     </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 

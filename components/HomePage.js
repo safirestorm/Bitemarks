@@ -7,7 +7,7 @@ import {
   ActivityIndicator,
   Platform,
 } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { FAB, SearchBar } from "react-native-elements";
 import { useState, useEffect } from "react";
 import { collection } from "firebase/firestore";
@@ -92,7 +92,7 @@ export function HomePage({ navigation }) {
 
         {view === "map" ? (
           <View style={styles.content}>
-            <MapView style={styles.map} region={region}>
+            <MapView style={styles.map} region={region} provider={PROVIDER_GOOGLE}>
               {data
                 .filter(
                   (r) =>

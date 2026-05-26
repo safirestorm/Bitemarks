@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
-import MapView, { Marker } from "react-native-maps";
+import MapView, { Marker, PROVIDER_GOOGLE } from "react-native-maps";
 import { useEffect, useRef, useState } from "react";
 import * as Location from "expo-location";
 import { auth, database } from "../firebase";
@@ -68,7 +68,7 @@ export function MapPage({ navigation }) {
 
   return (
     <View style={{ flex: 1 }}>
-      <MapView style={styles.map} region={region} onLongPress={addPlace}>
+      <MapView style={styles.map} region={region} onLongPress={addPlace} provider={PROVIDER_GOOGLE}>
         {data
           .filter((r) => r.lat && r.lng)
           .map((restaurant) => (

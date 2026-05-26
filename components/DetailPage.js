@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Alert,
   TextInput,
+  Platform,
 } from "react-native";
 import { Rating } from "@kolking/react-native-rating";
 import { doc, deleteDoc, updateDoc } from "firebase/firestore";
