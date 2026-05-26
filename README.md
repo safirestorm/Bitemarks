@@ -33,7 +33,7 @@ En React Native app til at gemme og review dine favorit spisesteder.
 
 5. Start appen:
    ```bash
-   npx expo start
+   npx expo
    ```
 
 6. Scan QR-koden med Expo Go, eller tryk `i` for iOS-simulator / `a` for Android-emulator.
